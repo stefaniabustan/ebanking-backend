@@ -14,15 +14,19 @@ import java.awt.event.TextEvent;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+
+import static com.ebank.Ebanking.Entity.enums.UserType.ADMIN;
 
 @Service
 public class UserServiceImpl implements UserService, Serializable {
 
     @Autowired
     private UserRepo userRepo;
+
 
     public User saveDetails(User user){
 
@@ -32,68 +36,66 @@ public class UserServiceImpl implements UserService, Serializable {
     @Override
     public List<User> findBy(Map<String, String> allParams) {
         //asa imi cauta mereu si dupa id
-        User pricingStrategy = setPricingStrategy(allParams);
+        User pricingStrategy = setPricingStrategy(allParams,2);
         Example<User> example = Example.of(pricingStrategy);
 
         return userRepo.findAll(example);
 
     }
     @Override
-    public List<User> modify(Map<String, String> allParams) {
-        User user = setPricingStrategy(allParams);
-        Example<User> example = Example.of( setPricingStrategy(allParams));//pt a face delete or update trebuie ID ul
-        List <User> listUser = Collections.emptyList();
-        switch (allParams.get("operation")){
-            case "delete":
-                listUser = userRepo.findAll(example);
-                for(User  u: listUser)
-                    userRepo.delete(u);
-                break;
+    public User modify(Map<String, String> allParams) {
+        User user = setPricingStrategy(allParams,2);
+        Example<User> example = Example.of( setPricingStrategy(allParams,1));//pt a face delete or update trebuie ID ul
+        if(allParams.get("operation")!=null)
+        {
+            switch (allParams.get("operation")){
+                case "delete":
+                    user = userRepo.findAll(example).get(0);
+                    userRepo.delete(user);
+                    break;
 
-            case "update":
-//sa vad in functie de cum fac in interfata
-                listUser = userRepo.findAll(example);
-                user = userRepo.findAll(example).get(0);
 
-                if(this.findBy(allParams).get(0)!=null)
+                case "update": //neaparat id sa dau (altfel face insert)
                 {
-                    User aux= userRepo.findAll(example).get(0); //to take the attributes unchanged
-                    if(user.getPassword()==null && aux.getPassword()!=null)
-                        user.setPassword(aux.getPassword());
-                    if(user.getUsername()==null && aux.getUsername()!=null)
-                        user.setUsername(aux.getUsername());
-                    if(user.getType()==null && aux.getType()!=null)
-                        user.setType(aux.getType());
-                    userRepo.save(aux);
+                    User old = userRepo.findAll(example).get(0);
+                    if(user.getUsername()==null && old.getUsername()!=null)
+                        user.setUsername(old.getUsername());
+                    if(user.getPassword()==null && old.getPassword()!=null)
+                        user.setPassword(old.getPassword());
+                    userRepo.save(user);
+                    System.out.println("fac update user");
+                    break;
                 }
 
-                break;
-
-            case "insert":
-            {
-                try{
-                    userRepo.save(user);
-                    listUser = Collections.singletonList(user);
-                }catch (Exception e)
+                case "insert":
                 {
-                    System.out.println("username unic");
+                    try{
+                        userRepo.save(user);
+                        System.out.println("face insert user");
+                    }catch (Exception e)
+                    {
+                        System.out.println("username unic");
+                    }
                 }
             }
         }
-        return listUser;
+
+        return user;
     }
 
     @Override
     public User getUserByUsername(String username){
         User user=userRepo.getByUsername(username);
-        if(user==null) return new User("null","null",UserType.ADMIN, Status.ACTIVE);
+        if(user==null) return new User("null","null", ADMIN, Status.ACTIVE);
         else return user;
     }
 
-    private User setPricingStrategy(Map<String, String> allParams){ //return user
+    private User setPricingStrategy(Map<String, String> allParams, int step){ //return user
         User user= new User();
         if (allParams.get("id")!=null)
             user.setId(Integer.parseInt(allParams.get("id")));
+        if(step==1)
+            return user;
         if (allParams.get("username")!=null)
             user.setUsername(allParams.get("username"));
         if (allParams.get("password")!=null)
@@ -103,6 +105,11 @@ public class UserServiceImpl implements UserService, Serializable {
         if (allParams.get("status")!=null)
             user.setStatus(Status.valueOf(allParams.get("status")));
         return user;
+    }
+
+    @Override
+    public List<User> getAllUsers() {
+        return userRepo.findAll();
     }
 
 

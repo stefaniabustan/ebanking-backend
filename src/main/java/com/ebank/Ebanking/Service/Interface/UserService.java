@@ -7,7 +7,8 @@ import java.util.Map;
 
 public interface UserService {
     List<User> findBy(Map<String, String> allParams);
-    List <User> modify(Map<String,String> allParams);
+    User modify(Map<String,String> allParams);
 
     User getUserByUsername(String username);
+     List<User> getAllUsers();
 }
