@@ -35,3 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Ignore line ending changes for specific files
+build.gradle
+src/main/resources/application.properties

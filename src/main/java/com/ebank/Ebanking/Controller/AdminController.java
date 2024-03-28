@@ -33,17 +33,6 @@ public class AdminController {
         return adminService.findBy(allParams);
     }
 
-    @RequestMapping(value = "/admin/logOut", method = RequestMethod.GET)
-    public void logOut( HttpServletRequest request) {
-        request.getSession().removeAttribute("admin");
-        return;
-
-    }
-
-    @RequestMapping(value = "/admin/check", method = RequestMethod.GET)
-    public String check( HttpServletRequest request) {
-        return (String) request.getSession().getAttribute("admin");
-    }
 
     @RequestMapping(value="/admin/saveAdmin",method = RequestMethod.POST)
     public void savePatient(@RequestBody Admin admin){

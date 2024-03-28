@@ -34,17 +34,6 @@ public class EmployeeController {
         return employeeService.findBy(allParams);
     }
 
-    @RequestMapping(value = "/employee/logOut", method = RequestMethod.GET)
-    public void logOut( HttpServletRequest request) {
-        request.getSession().removeAttribute("employee");
-        return;
-
-    }
-
-    @RequestMapping(value = "/employee/check", method = RequestMethod.GET)
-    public String check( HttpServletRequest request) {
-        return (String) request.getSession().getAttribute("employee");
-    }
 
     @RequestMapping(value="/employee/saveEmployee",method = RequestMethod.POST)
     public void savePatient(@RequestBody Employee employee){
